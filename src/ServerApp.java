@@ -10,5 +10,6 @@ public class ServerApp {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         Registry registry = LocateRegistry.createRegistry(5089);
         registry.rebind("auth", new AuthServant());
+        registry.rebind("print", new PrintServant());
     }
 }
