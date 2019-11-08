@@ -12,113 +12,102 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
 public class AuthServant extends UnicastRemoteObject implements AuthService {
-    private final byte[] password;
     private KeyFactory factory = KeyFactory.getInstance("RSA");
-    private RSAPublicKeySpec pub;
-    private RSAPrivateKeySpec priv;
+    private RSAPublicKeySpec publicKeySpec;
+    private RSAPrivateKeySpec privateKeySpec;
+    private DataBaseConnection db;
 
-
-    protected AuthServant() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+    AuthServant(DataBaseConnection db) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         super();
+        this.db = db;
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         KeyPair keyPair = kpg.generateKeyPair();
 
-        this.pub = factory.getKeySpec(keyPair.getPublic(), RSAPublicKeySpec.class);
-        this.priv = factory.getKeySpec(keyPair.getPrivate(), RSAPrivateKeySpec.class);
-        byte[] salt = getRandomSalt();
-        this.password = concatBytes( hash("Hello123".getBytes(), salt), salt );
+        publicKeySpec = factory.getKeySpec(keyPair.getPublic(), RSAPublicKeySpec.class);
+        privateKeySpec = factory.getKeySpec(keyPair.getPrivate(), RSAPrivateKeySpec.class);
     }
 
     @Override
-    public String echo(String input) throws RemoteException {
-        return "From server: " + input;
+    public BigInteger getModulus() {
+        return publicKeySpec.getModulus();
     }
 
     @Override
-    public BigInteger getModulus() throws RemoteException {
-        return pub.getModulus();
+    public BigInteger getExponent() {
+        return publicKeySpec.getPublicExponent();
     }
 
     @Override
-    public BigInteger getExponent() throws RemoteException {
-        return pub.getPublicExponent();
-    }
+    public SessionInterface authenticate(byte[] userNameEncrypted, byte[] passwordEncrypted) throws NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException, RemoteException {
+        // Decrypt password and username
+        byte[] passwordReceived = rsaDecrypt(passwordEncrypted);
+        String userName = new String( rsaDecrypt(userNameEncrypted) );
 
-    @Override
-    public boolean authenticate(byte[] passwordEncrypted) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
-        byte[] password = rsaDecrypt(passwordEncrypted);
-        byte[] passwordWithSaltFromDB = getPasswordFromDB();
+        // Get password from database
+        byte[] passwordWithSaltFromDB = db.getPassword(userName);
         byte[] passwordFromDB = extractPassword(passwordWithSaltFromDB);
         byte[] salt = extractSalt(passwordWithSaltFromDB);
-        byte[] passwordHashed = hash(password, salt);
 
-        return Arrays.equals(passwordFromDB, passwordHashed);
+        // Hash received password to compare with password from database
+        byte[] passwordReceivedHashed = hash(passwordReceived, salt);
+
+        // Check if received hashed password match hashed password from database
+        if (Arrays.equals(passwordFromDB, passwordReceivedHashed)) {
+            // Return a session to the user
+            return new Session();
+        }
+        return null;
     }
 
     @Override
     public boolean register(byte[] userNameEncrypted, byte[] passwordEncrypted) throws IOException, NoSuchPaddingException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        // Decrypt password and username
         byte[] password = rsaDecrypt(passwordEncrypted);
         byte[] username = rsaDecrypt(userNameEncrypted);
-        byte[] salt = getRandomSalt();
-        byte[] passwordHashed = hash(password, salt);
-        byte[] passwordHashedWithSalt = concatBytes(passwordHashed, salt);
-        // TODO: savePassword(username, passwordHashedWithSalt);
+
+        // Create salt and hash password
+        byte[] salt = createRandomSalt();
+        byte[] passwordHash = hash(password, salt); // Hash password
+        byte[] passwordHashSalt = concatBytes(passwordHash, salt); // Append salt to hashed password
+
+        // Create new User
+        db.registerUser(new String(username), passwordHashSalt);
 
         return true;
     }
 
     private byte[] rsaDecrypt(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        BigInteger modulus = priv.getModulus();
-        BigInteger exponent = priv.getPrivateExponent();
+        BigInteger modulus = privateKeySpec.getModulus();
+        BigInteger exponent = privateKeySpec.getPrivateExponent();
         RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(modulus, exponent);
-        PrivateKey privKey = factory.generatePrivate(keySpec);
+        PrivateKey privateKey = factory.generatePrivate(keySpec);
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, privKey);
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
         return cipher.doFinal(data);
     }
 
-    private byte[] hash(byte[] password, byte[] salt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    private byte[] hash(byte[] password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-
-        // Create PBKDF2 cipher
         char[] charPassword = (new String(password)).toCharArray();
         KeySpec spec = new PBEKeySpec(charPassword, salt, 65536, 128);
-
-        byte[] hash = factory.generateSecret(spec).getEncoded();
-        System.out.println("hash length: "+hash.length);
-        for (byte b : hash) {
-            System.out.print(b+" ");
-        }
-
-        return hash;
+        return factory.generateSecret(spec).getEncoded();
     }
-
 
     private byte[] extractPassword(byte[] passwordHash) {
         return Arrays.copyOfRange(passwordHash, 0, 16);
     }
 
     private byte[] extractSalt(byte[] passwordHash) {
-        System.out.println(passwordHash.length);
         return Arrays.copyOfRange(passwordHash, 16, 32);
     }
 
-    private byte[] getRandomSalt() {
+    private byte[] createRandomSalt() {
         SecureRandom generator = new SecureRandom();
         byte[] salt = new byte[16];
         generator.nextBytes(salt);
-        System.out.println("salt length: "+salt.length);
-        for (byte b : salt) {
-            System.out.print(b+" ");
-        }
-        System.out.println();
         return salt;
-    }
-
-    private byte[] getPasswordFromDB() {
-        return this.password;
     }
 
     private byte[] concatBytes(byte[] a, byte[] b) throws IOException {
@@ -128,5 +117,11 @@ public class AuthServant extends UnicastRemoteObject implements AuthService {
         return outputStream.toByteArray();
     }
 
+    private void printBytes(byte[] bytes) {
+        for (byte b : bytes) {
+            System.out.print(b+" ");
+        }
+        System.out.println("");
+    }
 
 }
