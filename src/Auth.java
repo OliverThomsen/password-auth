@@ -11,13 +11,13 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
-public class AuthServant extends UnicastRemoteObject implements AuthService {
+public class Auth extends UnicastRemoteObject implements AuthInterface {
     private KeyFactory factory = KeyFactory.getInstance("RSA");
     private RSAPublicKeySpec publicKeySpec;
     private RSAPrivateKeySpec privateKeySpec;
     private DataBaseConnection db;
 
-    AuthServant(DataBaseConnection db) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    Auth(DataBaseConnection db) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         super();
         this.db = db;
 

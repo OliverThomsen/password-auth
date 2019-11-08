@@ -23,7 +23,7 @@ public class ClientApp {
 
     public static void main(String[] args) throws IOException, NotBoundException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {
         factory = KeyFactory.getInstance("RSA");
-        AuthService auth = (AuthService) Naming.lookup("rmi://localhost:5099/auth");
+        AuthInterface auth = (AuthInterface) Naming.lookup("rmi://localhost:5099/auth");
 
         modulus = auth.getModulus();
         exponent = auth.getExponent();
@@ -34,7 +34,7 @@ public class ClientApp {
         );
 
         try {
-            PrintService printer = session.getPrinter();
+            PrintServerInterface printer = session.getPrinter();
             System.out.println("Start: " +
                     printer.start()
             );

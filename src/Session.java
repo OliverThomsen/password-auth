@@ -11,9 +11,9 @@ public class Session extends UnicastRemoteObject implements SessionInterface {
     }
 
     @Override
-    public PrintService getPrinter() throws RemoteException, AuthenticationException {
+    public PrintServerInterface getPrinter() throws RemoteException, AuthenticationException {
         checkAuthentication();
-        return new PrintServant(this);
+        return new PrintServer(this);
     }
 
     @Override

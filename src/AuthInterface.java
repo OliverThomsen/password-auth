@@ -9,7 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-public interface AuthService extends Remote {
+public interface AuthInterface extends Remote {
     BigInteger getModulus() throws RemoteException;
 
     BigInteger getExponent() throws RemoteException;

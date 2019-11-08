@@ -8,6 +8,6 @@ public class ServerApp {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         DataBaseConnection db = new DataBaseConnection();
         Registry registry = LocateRegistry.createRegistry(5099);
-        registry.rebind("auth", new AuthServant(db));
+        registry.rebind("auth", new Auth(db));
     }
 }

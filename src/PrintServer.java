@@ -1,13 +1,12 @@
 import javax.naming.AuthenticationException;
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class PrintServant extends UnicastRemoteObject implements PrintService {
+public class PrintServer extends UnicastRemoteObject implements PrintServerInterface {
 
     private final SessionInterface session;
 
-    protected PrintServant(SessionInterface session) throws RemoteException {
+    protected PrintServer(SessionInterface session) throws RemoteException {
         super();
         this.session = session;
     }
