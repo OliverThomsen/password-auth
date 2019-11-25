@@ -56,7 +56,7 @@ public class Auth extends UnicastRemoteObject implements AuthInterface {
         // Check if received hashed password match hashed password from database
         if (Arrays.equals(passwordFromDB, passwordReceivedHashed)) {
             // Return a session to the user
-            return new Session();
+            return new Session(userName);
         }
         return null;
     }
