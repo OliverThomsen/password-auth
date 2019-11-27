@@ -6,8 +6,14 @@ import java.security.spec.InvalidKeySpecException;
 
 public class ServerApp {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        DataBaseConnection db = new DataBaseConnection();
-        Registry registry = LocateRegistry.createRegistry(5099);
-        registry.rebind("auth", new Auth(db));
+
+        boolean useDatabase = false;
+        int port = 5099;
+
+        Storage storage = new Storage();
+        Auth auth = useDatabase ? new Auth(new DataBaseConnection(), storage) : new Auth(storage);
+        Registry registry = LocateRegistry.createRegistry(port);
+        registry.rebind("auth", auth);
+        System.out.println("Server running on port: "+port);
     }
 }
