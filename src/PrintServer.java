@@ -12,74 +12,83 @@ public class PrintServer extends UnicastRemoteObject implements PrintServerInter
     }
 
     @Override
-    public boolean print(String filename, String printer) throws RemoteException, AuthenticationException {
+    public String print(String filename, String printer) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("print");
-        System.out.println("Print " + filename + " on " + printer);
-        return true;
+        String result = "Print " + filename + " on " + printer;
+        System.out.println(result);
+        return result;
     }
 
     @Override
     public String queue(String printer) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("queue");
-        System.out.println("Display printer queue");
-        return "001 fileOne, 002 fileTwo, 003 fileThree";
+        String result = "Display printer queue";
+        System.out.println(result);
+        return result;
     }
 
     @Override
-    public boolean topQueue(String printer, int job) throws RemoteException, AuthenticationException {
+    public String topQueue(String printer, int job) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("topQueue");
-        System.out.println("Move " + job + " to top of que on " + printer);
-        return true;
+        String result = "Move " + job + " to top of queue on " + printer;
+        System.out.println(result);
+        return result;
     }
 
     @Override
-    public boolean start() throws RemoteException, AuthenticationException {
+    public String start() throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("start");
-        System.out.println("Start print server");
-        return true;
+        String result = "Start print server";
+        System.out.println(result);
+        return result;
     }
 
     @Override
-    public boolean stop() throws RemoteException, AuthenticationException {
+    public String stop() throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("stop");
-        System.out.println("Stop print server");
-        return true;
+        String result = "Stop print server";
+        System.out.println(result);
+        return result;
     }
 
     @Override
-    public boolean restart() throws RemoteException, AuthenticationException {
+    public String restart() throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("restart");
-        System.out.println("Restart print server");
-        return true;
+        String result = "Restart print server";
+        System.out.println(result);
+        return result;
     }
 
     @Override
     public String status(String printer) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("status");
-        System.out.println("Print status of " + printer);
-        return "This is the status of the printer: " + printer;
+        String result = "Print status of " + printer;
+        System.out.println(result);
+        return result;
     }
 
     @Override
     public String readConfig(String parameter) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("readConfig");
-        System.out.println("Read config");
-        return "This is the value of the parameter: " + parameter;
+        String result = "Read config";
+        System.out.println(result);
+        return result;
     }
 
     @Override
-    public boolean setConfig(String parameter, String value) throws RemoteException, AuthenticationException {
+    public String setConfig(String parameter, String value) throws RemoteException, AuthenticationException {
         session.checkAuthentication();
         session.checkPermissions("setConfig");
-        System.out.println("Set config");
-        return true;
+        String result = "Set config";
+        System.out.println(result);
+        return result;
     }
 }
