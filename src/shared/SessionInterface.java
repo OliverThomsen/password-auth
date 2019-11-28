@@ -1,3 +1,5 @@
+package shared;
+
 import javax.naming.AuthenticationException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;

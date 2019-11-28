@@ -1,3 +1,5 @@
+package server;
+
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;

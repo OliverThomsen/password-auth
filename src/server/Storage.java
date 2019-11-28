@@ -1,4 +1,5 @@
-import javax.swing.text.IconView;
+package server;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +39,7 @@ public class Storage {
 
     private HashMap<String, ArrayList<String>> getHashMapFromFile(String fileName) {
         HashMap<String, ArrayList<String>> hashMap = new HashMap<>();
-        String absolutePath = System.getProperty("user.dir")+"/src/"+fileName+".txt";
+        String absolutePath = System.getProperty("user.dir")+"/src/Server/Storage/"+fileName+".txt";
         try {
             List<String> allLines = Files.readAllLines(Paths.get(absolutePath));
             for (String line : allLines) {

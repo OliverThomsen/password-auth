@@ -1,3 +1,8 @@
+package server;
+
+import shared.PrintServerInterface;
+import shared.SessionInterface;
+
 import javax.naming.AuthenticationException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

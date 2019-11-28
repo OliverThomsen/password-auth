@@ -1,3 +1,9 @@
+package client;
+
+import shared.AuthInterface;
+import shared.PrintServerInterface;
+import shared.SessionInterface;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;

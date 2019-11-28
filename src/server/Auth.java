@@ -1,3 +1,8 @@
+package server;
+
+import shared.AuthInterface;
+import shared.SessionInterface;
+
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
@@ -10,7 +15,6 @@ import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
-import java.util.Formatter;
 
 public class Auth extends UnicastRemoteObject implements AuthInterface {
     private KeyFactory factory = KeyFactory.getInstance("RSA");
@@ -58,7 +62,7 @@ public class Auth extends UnicastRemoteObject implements AuthInterface {
         String userName = new String( rsaDecrypt(userNameEncrypted) );
 
         try {
-            // Get password from Storage
+            // Get password from Server.Storage
             byte[] passwordWithSaltFromStorage = storage.getPassword(userName);
             byte[] passwordFromStorage = extractPassword(passwordWithSaltFromStorage);
             byte[] salt = extractSalt(passwordWithSaltFromStorage);
@@ -69,7 +73,7 @@ public class Auth extends UnicastRemoteObject implements AuthInterface {
             // Compare received password with password from storage
             if (Arrays.equals(passwordFromStorage, passwordReceivedHashed)) {
                 System.out.println(userName + " authenticated");
-                // Return a Session to the user
+                // Return a Server.Session to the user
                 return new Session(userName, storage);
             }
         } catch (NullPointerException e) {
