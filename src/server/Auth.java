@@ -23,10 +23,17 @@ public class Auth extends UnicastRemoteObject implements AuthInterface {
     private DataBaseConnection db;
     private Storage storage;
 
-    Auth(Storage storage) throws RemoteException, InvalidKeySpecException, NoSuchAlgorithmException {
+    Auth(Storage storage) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         super();
         this.storage = storage;
         initRSAEncryption();
+        byte[] salt = createRandomSalt();
+        byte[] passwordHash = hash("Hello123".getBytes(), salt); // Hash password
+        byte[] passwordHashSalt = Converter.concatBytes(passwordHash, salt); // Append salt to hashed password
+
+        // Create new User
+//        db.registerUser(new String(username), passwordHashSalt);
+        System.out.println(Converter.byteArrayToHex(passwordHashSalt));
     }
 
     Auth(DataBaseConnection db, Storage storage) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
